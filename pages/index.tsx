@@ -41,13 +41,13 @@ let setJazzChords: Dispatch<SetStateAction<boolean>>
 
 export default function Home() {
     [getDisplayNotes, setDisplayNotes] = useState("") as [string, Dispatch<SetStateAction<string>>]
-    [getVoice, setVoice] = useState("sawtooth") as [OscillatorType, Dispatch<SetStateAction<OscillatorType>>]
+    [getVoice, setVoice] = useState("sine") as [OscillatorType, Dispatch<SetStateAction<OscillatorType>>]
     [getScale, setScale] = useState("random") as [MusicalNote | "random", Dispatch<SetStateAction<MusicalNote | "random">>]
     [getBeatsPerMinute, setBeatsPerMinute] = useState(240) as [number, Dispatch<SetStateAction<number>>]
     [getBeatsInABar, setBeatsInABar] = useState(3) as [number, Dispatch<SetStateAction<number>>]
     [getPercentageOfNotesDropped, setPercentageOfNotesDropped] = useState(20) as [number, Dispatch<SetStateAction<number>>]
     [getChordFrequencyMultiplier, setChordFrequencyMultiplier] = useState(0.50) as [number, Dispatch<SetStateAction<number>>]
-    [getBanRepeatedNotes, setBanRepeatedNotes] = useState(true) as [boolean, Dispatch<SetStateAction<boolean>>]
+    [getBanRepeatedNotes, setBanRepeatedNotes] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getRandomiseRootNote, setRandomiseRootNote] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getSecondMelody, setSecondMelody] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getJazzHarmonies, setJazzHarmonies] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
@@ -77,7 +77,7 @@ export default function Home() {
                     </div> */}
 
                     <label>
-                        <select name="voice" className={styles.input} defaultValue="sawtooth" onChange={(choice) => setVoice(choice.target.value as OscillatorType)}>
+                        <select name="voice" className={styles.input} onChange={(choice) => setVoice(choice.target.value as OscillatorType)}>
                             <option value="sine">Sine</option>
                             <option value="triangle">Triangle</option>
                             <option value="sawtooth" >Sawtooth</option>

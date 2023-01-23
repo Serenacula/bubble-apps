@@ -3,13 +3,25 @@
     height: 100vh;
 
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.main > * > * {
+    display: block;
+    margin-bottom: 30px;
+}
+
+.input {
+    margin-right: 16px;
 }
 
 .bigButton {
     /* margin-left: calc(50% - 100px);
     margin-top: 50%; */
+    display: block;
+    margin-bottom: 50px;
 
     width: 200px;
     height: 100px;

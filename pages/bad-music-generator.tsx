@@ -1,16 +1,16 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/bigButton.module.css'
 
-export default function Home() {
+// Sound Genderator - It makes up random music, but uses the voice samples for the sounds. 
+// You can play with the mix of the genders of the voice samples, to modify the resulting sound.
+
+import styles from "../styles/bigButton.module.css"
+
+const beatsPerMinute = 240
+
+
+
+export default function SoundGenerator() {
     return (
         <>
-            <Head>
-                <title>Bad Music Generator</title>
-                <meta name="description" content="Bad Music Generator" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
             <main className={styles.main}>
                 <button className={styles.bigButton} onClick={playMusic}>
                     Play
@@ -21,8 +21,6 @@ export default function Home() {
         </>
     )
 }
-
-const beatsPerMinute = 240
 
 function playMusic() {
     // const noteFrequencies = [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88]

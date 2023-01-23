@@ -64,17 +64,17 @@ function playMusic() {
         return scalePositions.map(position => doubledNotes[position + rootIndex] as MusicalNote)
     }
 
-    const scaleC: NoteArray = getScale("C")
-    const scaleCSharp: NoteArray = getScale("C#")
-    const scaleD: NoteArray = getScale("D")
-    const scaleDSharp: NoteArray = getScale("D#")
-    const scaleE: NoteArray = getScale("E")
-    const scaleF: NoteArray = getScale("F")
-    const scaleG: NoteArray = getScale("G")
-    const scaleGSharp: NoteArray = getScale("G#")
-    const scaleA: NoteArray = getScale("A")
-    const scaleASharp: NoteArray = getScale("A#")
-    const scaleB: NoteArray = getScale("B")
+    // const scaleC: NoteArray = getScale("C")
+    // const scaleCSharp: NoteArray = getScale("C#")
+    // const scaleD: NoteArray = getScale("D")
+    // const scaleDSharp: NoteArray = getScale("D#")
+    // const scaleE: NoteArray = getScale("E")
+    // const scaleF: NoteArray = getScale("F")
+    // const scaleG: NoteArray = getScale("G")
+    // const scaleGSharp: NoteArray = getScale("G#")
+    // const scaleA: NoteArray = getScale("A")
+    // const scaleASharp: NoteArray = getScale("A#")
+    // const scaleB: NoteArray = getScale("B")
 
 
     const audioContext = new AudioContext()
@@ -86,30 +86,16 @@ function playMusic() {
      */
 
     const scale = getScale(randomNote())
-    const melody = generateMelody(scale)
+    const melody = generateMelody(scale, randomNote(scale))
+    const melody2 = generateMelody(scale, randomNote(scale))
     const chords = generateChords(melody, scale)
 
     playNotes(convertToFrequencies(melody, 1))
+    playNotes(convertToFrequencies(melody2, 1))
     for (const chordChart of chords) {
         playNotes(convertToFrequencies(chordChart, 0.66))
         // playNotes(convertToFrequencies(chordChart, 2))
     }
-
-
-
-
-
-
-
-
-
-
-    // playNotes(generateMelody(), 16)
-    // playNotes(generateMelody(), 16)
-    // playNotes(generateMelody(), 32)
-    // playNotes(generateMelody(), 32)
-
-
 
 
 
@@ -143,11 +129,19 @@ function playMusic() {
         }
     }
 
-    function generateMelody(inputScale?: NoteArray): NoteArrayWithSilence {
+    function randomHarmonic(scale: NoteArray, jazzOn = false): MusicalNote {
+        const harmonics = [scale[0], scale[2], scale[4]] as MusicalNote[]
+        if (jazzOn) {
+            harmonics.push(scale[6])
+        }
+
+        return harmonics[Math.floor(Math.random() * harmonics.length)]
+    }
+
+    function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScale[0]): NoteArrayWithSilence {
 
         // const scale: NoteArray = transposeScale(Math.floor(Math.random() * 10))
-        const scale = inputScale || getScale(randomNote())
-        const rootNote = scale[0]
+        const scale = inputScale
 
         const firstPhrase = randomPhrase(scale, rootNote)
         const melody: NoteArrayWithSilence = [
@@ -202,14 +196,7 @@ function playMusic() {
         }
 
 
-        function randomHarmonic(scale: NoteArray, jazzOn = false): MusicalNote {
-            const harmonics = [scale[0], scale[2], scale[4]] as MusicalNote[]
-            if (jazzOn) {
-                harmonics.push(scale[6])
-            }
 
-            return harmonics[Math.floor(Math.random() * harmonics.length)]
-        }
 
         function chooseThreeNoteType(scale: NoteArray, startingNote: MusicalNote) {
             if (Math.random() * 10 >= 5) {
@@ -274,31 +261,33 @@ function playMusic() {
         for (const note of melody) {
             i++
 
-            if (!(i % 3)) {
+            const beatsInBar = 3
+
+            if (!(i % beatsInBar)) {
                 if (note.note !== "silence") {
-                    const random = Math.floor(Math.random() * 3)
+                    const random = Math.floor(Math.random() * beatsInBar)
                     if (random === 0) {
-                        chordFirstVoice.push({ note: doubledScale[scale.indexOf(note.note)], noteLength: note.noteLength * 3 })
-                        chordSecondVoice.push({ note: doubledScale[scale.indexOf(note.note) + 2], noteLength: note.noteLength * 3 })
-                        chordThirdVoice.push({ note: doubledScale[scale.indexOf(note.note) + 4], noteLength: note.noteLength * 3 })
-                        chordFourthVoice.push({ note: doubledScale[scale.indexOf(note.note) + 6], noteLength: note.noteLength * 3 })
+                        chordFirstVoice.push({ note: doubledScale[scale.indexOf(note.note)], noteLength: note.noteLength * beatsInBar })
+                        chordSecondVoice.push({ note: doubledScale[scale.indexOf(note.note) + 2], noteLength: note.noteLength * beatsInBar })
+                        chordThirdVoice.push({ note: doubledScale[scale.indexOf(note.note) + 4], noteLength: note.noteLength * beatsInBar })
+                        chordFourthVoice.push({ note: doubledScale[scale.indexOf(note.note) + 6], noteLength: note.noteLength * beatsInBar })
                     } else if (random === 1) {
-                        chordFirstVoice.push({ note: doubledScale[scale.indexOf(note.note) - 2], noteLength: note.noteLength * 3 })
-                        chordSecondVoice.push({ note: doubledScale[scale.indexOf(note.note)], noteLength: note.noteLength * 3 })
-                        chordThirdVoice.push({ note: doubledScale[scale.indexOf(note.note) + 2], noteLength: note.noteLength * 3 })
-                        chordFourthVoice.push({ note: doubledScale[scale.indexOf(note.note) + 4], noteLength: note.noteLength * 3 })
+                        chordFirstVoice.push({ note: doubledScale[scale.indexOf(note.note) - 2], noteLength: note.noteLength * beatsInBar })
+                        chordSecondVoice.push({ note: doubledScale[scale.indexOf(note.note)], noteLength: note.noteLength * beatsInBar })
+                        chordThirdVoice.push({ note: doubledScale[scale.indexOf(note.note) + 2], noteLength: note.noteLength * beatsInBar })
+                        chordFourthVoice.push({ note: doubledScale[scale.indexOf(note.note) + 4], noteLength: note.noteLength * beatsInBar })
                     } else {
-                        chordFirstVoice.push({ note: doubledScale[scale.indexOf(note.note) - 4], noteLength: note.noteLength * 3 })
-                        chordSecondVoice.push({ note: doubledScale[scale.indexOf(note.note) - 2], noteLength: note.noteLength * 3 })
-                        chordThirdVoice.push({ note: doubledScale[scale.indexOf(note.note)], noteLength: note.noteLength * 3 })
-                        chordFourthVoice.push({ note: doubledScale[scale.indexOf(note.note) + 2], noteLength: note.noteLength * 3 })
+                        chordFirstVoice.push({ note: doubledScale[scale.indexOf(note.note) - 4], noteLength: note.noteLength * beatsInBar })
+                        chordSecondVoice.push({ note: doubledScale[scale.indexOf(note.note) - 2], noteLength: note.noteLength * beatsInBar })
+                        chordThirdVoice.push({ note: doubledScale[scale.indexOf(note.note)], noteLength: note.noteLength * beatsInBar })
+                        chordFourthVoice.push({ note: doubledScale[scale.indexOf(note.note) + 2], noteLength: note.noteLength * beatsInBar })
                     }
 
                 } else {
-                    chordFirstVoice.push({ note: "silence", noteLength: note.noteLength * 3 })
-                    chordSecondVoice.push({ note: "silence", noteLength: note.noteLength * 3 })
-                    chordThirdVoice.push({ note: "silence", noteLength: note.noteLength * 3 })
-                    chordFourthVoice.push({ note: "silence", noteLength: note.noteLength * 3 })
+                    chordFirstVoice.push({ note: "silence", noteLength: note.noteLength * beatsInBar })
+                    chordSecondVoice.push({ note: "silence", noteLength: note.noteLength * beatsInBar })
+                    chordThirdVoice.push({ note: "silence", noteLength: note.noteLength * beatsInBar })
+                    chordFourthVoice.push({ note: "silence", noteLength: note.noteLength * beatsInBar })
                 }
             }
         }

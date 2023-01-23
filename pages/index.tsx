@@ -149,11 +149,11 @@ function playMusic() {
         const scale = inputScale || getScale(randomNote())
         const rootNote = scale[0]
 
-        const firstPhrase = randomPhrase(rootNote)
+        const firstPhrase = randomPhrase(scale, rootNote)
         const melody: NoteArrayWithSilence = [
             ...firstPhrase,
             ...firstPhrase,
-            ...randomPhrase(rootNote),
+            ...randomPhrase(scale, rootNote),
             ...firstPhrase,
             {
                 note: rootNote,
@@ -161,7 +161,7 @@ function playMusic() {
             }
         ]
 
-        return removeRandomNotes(melody)
+        return melody
 
 
 
@@ -169,19 +169,19 @@ function playMusic() {
 
 
         function removeRandomNotes(initialMelody: NoteArrayWithSilence) {
-            const result = initialMelody.map((note) => Math.random() * 10 > 1 ? note : { note: "silence", noteLength: note.noteLength })
+            const result = initialMelody.map((note) => Math.random() * 10 > 2 ? note : { note: "silence", noteLength: note.noteLength })
             return result as NoteArrayWithSilence
         }
 
 
-        function randomPhrase(presetNote?: MusicalNote, scale: NoteArray = scaleC, jazzOn = false): NoteArrayWithSilence {
+        function randomPhrase(scale: NoteArray, startingNote?: MusicalNote, jazzOn = false): NoteArrayWithSilence {
 
-            const firstNote: MusicalNote = presetNote ? presetNote : scaleC[0]
+            const firstNote: MusicalNote = startingNote ? startingNote : scale[0]
 
-            const firstThreeNotes = randomThreeNotes(firstNote, scale)
+            const firstThreeNotes = randomThreeNotes(scale, firstNote)
 
-            const secondThreeNotes = chooseThreeNoteType(randomHarmonic(scale, false), scale)
-            const thirdThreeNotes = chooseThreeNoteType(randomHarmonic(scale, false), scale)
+            const secondThreeNotes = chooseThreeNoteType(scale, randomHarmonic(scale))
+            const thirdThreeNotes = chooseThreeNoteType(scale, randomHarmonic(scale))
 
 
             const phrase = [
@@ -211,17 +211,17 @@ function playMusic() {
             return harmonics[Math.floor(Math.random() * harmonics.length)]
         }
 
-        function chooseThreeNoteType(startingNote?: MusicalNote, scale?: NoteArray) {
+        function chooseThreeNoteType(scale: NoteArray, startingNote: MusicalNote) {
             if (Math.random() * 10 >= 5) {
-                return randomMusicalScale(startingNote, scale)
+                return randomMusicalScale(scale, startingNote)
             } else {
-                return randomThreeNotes(startingNote, scale)
+                return randomThreeNotes(scale, startingNote)
             }
         }
 
-        function randomMusicalScale(startingNote?: MusicalNote, scale?: NoteArray): NoteArray {
+        function randomMusicalScale(scale: NoteArray, startingNote: MusicalNote): NoteArray {
             const result: NoteArray = []
-            const doubledNotes = scale ? [...scale, ...scale] : [...notes, ...notes]
+            const doubledNotes = [...scale, ...scale]
             result.push(startingNote || randomNote(scale))
             // Upward scale
             if (Math.random() * 10 >= 5) {
@@ -229,18 +229,10 @@ function playMusic() {
                     result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 1])
                     result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 2])
                     // result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 3])
-                } else {
-                    result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 1])
-                    result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 2])
-                    // result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 3])
                 }
                 // Downward scale
             } else {
                 if (scale) {
-                    result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 1])
-                    result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 2])
-                    // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 3])
-                } else {
                     result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 1])
                     result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 2])
                     // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 3])
@@ -256,7 +248,7 @@ function playMusic() {
          * Returns 3 random notes. You can specify a starting note, which is then returned
          * as the first note.
          */
-        function randomThreeNotes(startingNote?: MusicalNote, scale?: NoteArray): NoteArray {
+        function randomThreeNotes(scale: NoteArray, startingNote?: MusicalNote): NoteArray {
             const firstNote = startingNote ? startingNote : randomNote(scale)
             const secondNote = randomNote(scale, [firstNote])
             const thirdNote = randomNote(scale, [firstNote, secondNote])
@@ -271,8 +263,7 @@ function playMusic() {
 
 
 
-    function generateChords(melody: NoteArrayWithSilence, inputScale?: NoteArray, jazzOn = false) {
-        const scale = inputScale || notes
+    function generateChords(melody: NoteArrayWithSilence, scale: NoteArray, jazzOn = false) {
         const doubledScale = [...scale, ...scale]
         const chordFirstVoice: NoteArrayWithSilence = []
         const chordSecondVoice: NoteArrayWithSilence = []
@@ -333,11 +324,11 @@ function playMusic() {
         })
     }
 
-    function playNotes(noteArray: PlayableFrequencies, timeDelay = 0) {
-        console.log(noteArray);
+    function playNotes(noteFrequencies: PlayableFrequencies, timeDelay = 0) {
+        // console.log(noteFrequencies);
 
         let timeCounter = tempo(timeDelay)
-        for (const note of noteArray) {
+        for (const note of noteFrequencies) {
             if (note.frequency) {
 
                 const oscillator = audioContext.createOscillator()

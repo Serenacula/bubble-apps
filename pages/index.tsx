@@ -93,7 +93,7 @@ function playMusic() {
     playNotes(convertToFrequencies(melody, 1))
     playNotes(convertToFrequencies(melody2, 1))
     for (const chordChart of chords) {
-        playNotes(convertToFrequencies(chordChart, 0.66))
+        playNotes(convertToFrequencies(chordChart, 0.5))
         // playNotes(convertToFrequencies(chordChart, 2))
     }
 
@@ -313,7 +313,7 @@ function playMusic() {
         })
     }
 
-    function playNotes(noteFrequencies: PlayableFrequencies, timeDelay = 0) {
+    function playNotes(noteFrequencies: PlayableFrequencies, voice?: OscillatorType, timeDelay = 0) {
         // console.log(noteFrequencies);
 
         let timeCounter = tempo(timeDelay)
@@ -323,7 +323,7 @@ function playMusic() {
                 const oscillator = audioContext.createOscillator()
                 oscillator.connect(audioContext.destination);
 
-                oscillator.type = "sawtooth"
+                oscillator.type = voice || "sawtooth"
                 oscillator.frequency.value = note.frequency
 
 

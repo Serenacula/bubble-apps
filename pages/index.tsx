@@ -3,11 +3,14 @@ import Image from 'next/image'
 import { DetailedHTMLProps, Dispatch, HTMLAttributes, SetStateAction, useState } from 'react'
 import styles from '../styles/soundGenerator.module.css'
 
-// let getDisplayNotes: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>[]
-// let setDisplayNotes: Dispatch<SetStateAction<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>[]>>
+let getDisplayNotes: string
+let setDisplayNotes: Dispatch<SetStateAction<string>>
 
 let getVoice: OscillatorType
 let setVoice: Dispatch<SetStateAction<OscillatorType>>
+
+let getScale: MusicalNote | "random"
+let setScale: Dispatch<SetStateAction<MusicalNote | "random">>
 
 let getChordFrequencyMultiplier: number
 let setChordFrequencyMultiplier: Dispatch<SetStateAction<number>>
@@ -18,11 +21,17 @@ let setBeatsPerMinute: Dispatch<SetStateAction<number>>
 let getBeatsInABar: number
 let setBeatsInABar: Dispatch<SetStateAction<number>>
 
-let getSecondMelody: boolean
-let setSecondMelody: Dispatch<SetStateAction<boolean>>
+let getPercentageOfNotesDropped: number
+let setPercentageOfNotesDropped: Dispatch<SetStateAction<number>>
 
 let getBanRepeatedNotes: boolean
 let setBanRepeatedNotes: Dispatch<SetStateAction<boolean>>
+
+let getRandomiseRootNote: boolean
+let setRandomiseRootNote: Dispatch<SetStateAction<boolean>>
+
+let getSecondMelody: boolean
+let setSecondMelody: Dispatch<SetStateAction<boolean>>
 
 let getJazzHarmonies: boolean
 let setJazzHarmonies: Dispatch<SetStateAction<boolean>>
@@ -31,11 +40,15 @@ let getJazzChords: boolean
 let setJazzChords: Dispatch<SetStateAction<boolean>>
 
 export default function Home() {
+    [getDisplayNotes, setDisplayNotes] = useState("") as [string, Dispatch<SetStateAction<string>>]
     [getVoice, setVoice] = useState("sawtooth") as [OscillatorType, Dispatch<SetStateAction<OscillatorType>>]
+    [getScale, setScale] = useState("random") as [MusicalNote | "random", Dispatch<SetStateAction<MusicalNote | "random">>]
     [getBeatsPerMinute, setBeatsPerMinute] = useState(240) as [number, Dispatch<SetStateAction<number>>]
     [getBeatsInABar, setBeatsInABar] = useState(3) as [number, Dispatch<SetStateAction<number>>]
+    [getPercentageOfNotesDropped, setPercentageOfNotesDropped] = useState(20) as [number, Dispatch<SetStateAction<number>>]
     [getChordFrequencyMultiplier, setChordFrequencyMultiplier] = useState(0.50) as [number, Dispatch<SetStateAction<number>>]
     [getBanRepeatedNotes, setBanRepeatedNotes] = useState(true) as [boolean, Dispatch<SetStateAction<boolean>>]
+    [getRandomiseRootNote, setRandomiseRootNote] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getSecondMelody, setSecondMelody] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getJazzHarmonies, setJazzHarmonies] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getJazzChords, setJazzChords] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
@@ -57,16 +70,27 @@ export default function Home() {
                 <div>
 
                     {/* <div className={styles.display}>
-                        {getDisplayNotes}
+                        <h1>
+                            {getDisplayNotes}
+                        </h1>
                     </div> */}
 
-
-                    <select name="voice" defaultValue="sawtooth" onChange={(choice) => setVoice(choice.target.value as OscillatorType)}>
-                        <option value="sine">Sine</option>
-                        <option value="triangle">Triangle</option>
-                        <option value="sawtooth" >Sawtooth</option>
-                        <option value="square">Square</option>
-                    </select>
+                    <label>
+                        <select name="voice" className={styles.input} defaultValue="sawtooth" onChange={(choice) => setVoice(choice.target.value as OscillatorType)}>
+                            <option value="sine">Sine</option>
+                            <option value="triangle">Triangle</option>
+                            <option value="sawtooth" >Sawtooth</option>
+                            <option value="square">Square</option>
+                        </select>
+                        Voice: changes the sound produced
+                    </label>
+                    <label>
+                        <select name="scale" className={styles.input} defaultValue="random" onChange={(choice) => setScale(choice.target.value as MusicalNote | "random")}>
+                            <option value="random">Random</option>
+                            {notes.map(note => <option value={note}>{note}</option>)}
+                        </select>
+                        Scale Key
+                    </label>
                     <label>
                         <input type="number" className={styles.input} name="quantity" min="1" max="9999" step="1" value={getBeatsPerMinute} onChange={(change) => { setBeatsPerMinute(change.target.value as unknown as number) }} />
                         Beats Per Minute
@@ -80,10 +104,19 @@ export default function Home() {
                         <input type="number" className={styles.input} name="quantity" min="0.01" max="4.00" step="0.01" value={getChordFrequencyMultiplier} onChange={(change) => { setChordFrequencyMultiplier(change.target.value as unknown as number) }} />
                         Chord Frequency Multiplier: sets the frequency of the chords, relative to the melody. 0.5 = 1 octave down, 0.66 = a harmonic up from that, etc.
                     </label>
+
+                    <label>
+                        <input type="number" className={styles.input} name="quantity" min="1" max="100" step="1" value={getPercentageOfNotesDropped} onChange={(change) => { setPercentageOfNotesDropped(change.target.value as unknown as number) }} />
+                        Percentage of Notes Dropped: this is what produces an interesting rhythm. 10-20% is recommended
+                    </label>
                     <label>
                         <input type="checkbox" className={styles.input} name="banRepeatedNotes" checked={getBanRepeatedNotes} onChange={() => { setBanRepeatedNotes(!getBanRepeatedNotes) }} />
                         Ban Repeated Notes: when generating a random string of notes in a bar, it will attempt to avoid repetition
                         {/* Note: If the number of beats in a bar is bigger than the number of notes in the scale, this won't work. */}
+                    </label>
+                    <label>
+                        <input type="checkbox" className={styles.input} name="randomiseRootNote" checked={getRandomiseRootNote} onChange={() => { setRandomiseRootNote(!getRandomiseRootNote) }} />
+                        Randomise Root Note: pretends that the root note of the scale is a different note
                     </label>
                     <label>
                         <input type="checkbox" className={styles.input} name="secondMelody" checked={getSecondMelody} onChange={() => { setSecondMelody(!getSecondMelody) }} />
@@ -129,6 +162,10 @@ type NoteArray = MusicalNote[]
 type NoteArrayWithLength = MusicalNoteWithLength[]
 type NoteArrayWithSilence = Array<MusicalNoteWithLength | { note: "silence", noteLength: number }>
 
+
+
+
+
 function playMusic() {
 
     audioContext = new AudioContext()
@@ -137,9 +174,10 @@ function playMusic() {
      * MAKE THE MUSIC!
      */
 
-    const scale = getScale(randomNote())
-    const melody = generateMelody(scale, randomNote(scale))
-    const melody2 = generateMelody(scale, randomNote(scale))
+    const scale = getScale === "random" ? generateScale(randomNote()) : generateScale(getScale)
+    const rootNote = getRandomiseRootNote ? randomNote(scale) : scale[0]
+    const melody = generateMelody(scale, rootNote)
+    const melody2 = generateMelody(scale, randomHarmonic(scale, rootNote))
     const chords = generateChords(melody, scale)
 
     playNotes(convertToFrequencies(melody, 1))
@@ -158,7 +196,7 @@ function playMusic() {
 /**
  * Builds a major scale out, based on the starting note
  */
-function getScale(rootNote: MusicalNote, scaleType: "major" | "minor" = "major"): NoteArray {
+function generateScale(rootNote: MusicalNote, scaleType: "major" | "minor" = "major"): NoteArray {
     const rootIndex = notes.indexOf(rootNote)
     const majorScale = [0, 2, 4, 5, 7, 9, 11]
     const minorScale = [0, 2, 3, 5, 7, 9, 11]
@@ -189,10 +227,11 @@ function randomNote(scale?: NoteArray, bannedNotes?: MusicalNote[]): MusicalNote
     }
 }
 
-function randomHarmonic(scale: NoteArray): MusicalNote {
-    const harmonics = [scale[0], scale[2], scale[4]] as MusicalNote[]
+function randomHarmonic(scale: NoteArray, rootNote: MusicalNote): MusicalNote {
+    const doubledScale = [...scale, ...scale]
+    const harmonics = [rootNote, scale[scale.indexOf(rootNote) + 2], scale[scale.indexOf(rootNote) + 4]] as MusicalNote[]
     if (getJazzHarmonies) {
-        harmonics.push(scale[6])
+        harmonics.push(scale[scale.indexOf(rootNote) + 6])
     }
 
     return harmonics[Math.floor(Math.random() * harmonics.length)]
@@ -223,20 +262,18 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
 
 
     function removeRandomNotes(initialMelody: NoteArrayWithSilence) {
-        const result = initialMelody.map((note) => Math.random() * 10 > 2 ? note : { note: "silence", noteLength: note.noteLength })
+        const result = initialMelody.map((note) => Math.random() * 100 > getPercentageOfNotesDropped ? note : { note: "silence", noteLength: note.noteLength })
         return result as NoteArrayWithSilence
     }
 
 
-    function randomPhrase(scale: NoteArray, startingNote?: MusicalNote): NoteArrayWithSilence {
-
-        const firstNote: MusicalNote = startingNote ? startingNote : scale[0]
+    function randomPhrase(scale: NoteArray, firstNote: MusicalNote = scale[0]): NoteArrayWithSilence {
 
         const firstThreeNotes = randomSetOfNotes(scale, firstNote)
 
-        const secondThreeNotes = chooseNoteType(scale, randomHarmonic(scale))
-        const thirdThreeNotes = chooseNoteType(scale, randomHarmonic(scale))
-
+        const secondThreeNotes = chooseNoteType(scale, randomHarmonic(scale, firstNote))
+        const thirdThreeNotes = chooseNoteType(scale, randomHarmonic(scale, firstNote))
+        firstNote
 
         const phrase = [
             ...firstThreeNotes,
@@ -268,22 +305,33 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
 
     function randomMusicalScale(scale: NoteArray, startingNote: MusicalNote): NoteArray {
         const result: NoteArray = []
-        const doubledNotes = [...scale, ...scale]
+        // This can probably break and is definitely not the best way to do this,
+        // but it's also way easier than dynamically changing based on the number of beats in a bar
+        const doubledNotes = [...scale, ...scale, ...scale, ...scale, ...scale, ...scale]
         result.push(startingNote || randomNote(scale))
         // Upward scale
         if (Math.random() * 10 >= 5) {
-            if (scale) {
-                result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 1])
-                result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 2])
-                // result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 3])
+            let i = 1
+            while (i < getBeatsInABar) {
+                result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0] + i)])
+
+                i++
             }
+            // result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 1])
+            // result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 2])
+            // result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0]) + 3])
+
             // Downward scale
         } else {
-            if (scale) {
-                result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 1])
-                result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 2])
-                // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 3])
+            let i = 1
+            while (i < getBeatsInABar) {
+                result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - i])
+
+                i++
             }
+            // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 1])
+            // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 2])
+            // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 3])
         }
         console.log(result);
 
@@ -338,7 +386,7 @@ function generateChords(melody: NoteArrayWithSilence, scale: NoteArray) {
     for (const note of melody) {
         i++
 
-        const beatsInBar = 3
+        const beatsInBar = getBeatsInABar
 
         if (!(i % beatsInBar)) {
             if (note.note !== "silence") {

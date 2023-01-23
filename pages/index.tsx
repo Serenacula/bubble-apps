@@ -155,10 +155,10 @@ function playMusic() {
             ...firstPhrase,
             ...randomPhrase(scale, rootNote),
             ...firstPhrase,
-            {
-                note: rootNote,
-                noteLength: 4
-            }
+            // {
+            //     note: rootNote,
+            //     noteLength: 4
+            // }
         ]
 
         return melody
@@ -187,7 +187,7 @@ function playMusic() {
             const phrase = [
                 ...firstThreeNotes,
                 ...secondThreeNotes,
-                ...firstThreeNotes,
+                ...thirdThreeNotes,
                 firstNote
             ]
 

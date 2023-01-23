@@ -1,16 +1,16 @@
 .main {
-    width: 100vw;
+    /* width: 100vw; */
     min-height: 100vh;
 
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    /* justify-content: center; */
     align-items: center;
 }
 
 .main > * > * {
     display: block;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
 }
 
 .input {
@@ -21,6 +21,7 @@
     /* margin-left: calc(50% - 100px);
     margin-top: 50%; */
     display: block;
+    margin-top: 50px;
     margin-bottom: 50px;
 
     width: 200px;

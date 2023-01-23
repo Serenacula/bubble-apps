@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { DetailedHTMLProps, Dispatch, HTMLAttributes, SetStateAction, useState } from 'react'
-import styles from '../styles/soundGenerator.module.css'
+import styles from '../styles/badMusicGenerator.module.css'
 
 let getDisplayNotes: string
 let setDisplayNotes: Dispatch<SetStateAction<string>>
@@ -62,6 +62,7 @@ export default function Home() {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className={styles.main}>
+                <h1 className={styles.title}>Bad Music Generator</h1>
                 <div>
                     <button className={styles.bigButton} onClick={playMusic}>
                         Play
@@ -313,7 +314,7 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
         if (Math.random() * 10 >= 5) {
             let i = 1
             while (i < getBeatsInABar) {
-                result.push(doubledNotes[doubledNotes.findIndex((note) => note === result[0] + i)])
+                result.push(doubledNotes[doubledNotes.indexOf(result[0]) + i])
 
                 i++
             }

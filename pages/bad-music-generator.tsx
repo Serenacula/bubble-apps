@@ -2,7 +2,7 @@
 // Sound Genderator - It makes up random music, but uses the voice samples for the sounds. 
 // You can play with the mix of the genders of the voice samples, to modify the resulting sound.
 
-import styles from "../styles/soundGenerator.module.css"
+import styles from "../styles/badMusicGenerator.module.css"
 
 const beatsPerMinute = 240
 

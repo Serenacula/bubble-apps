@@ -68,7 +68,6 @@ export default function Home() {
             </Head>
             <main className={styles.main}>
                 <h1 className={styles.title}>Bad Music Generator</h1>
-                <p>This does not work well on phones. I don't know why.</p>
                 <div>
                     <button className={styles.bigButton} onClick={playMusic}>
                         Play
@@ -89,7 +88,7 @@ export default function Home() {
                             <option value="sawtooth" >Sawtooth</option>
                             <option value="square">Square</option>
                         </select>
-                        Voice: changes the sound produced. Rougher sounds like sawtooth and square work best on mobile.
+                        Voice: changes the sound produced.
                     </label>
                     <label>
                         <select name="scale" className={styles.input} onChange={(choice) => setScale(choice.target.value as MusicalNote | "random")}>

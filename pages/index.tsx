@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import * as tone from "tone"
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import styles from '../styles/badMusicGenerator.module.css'
 

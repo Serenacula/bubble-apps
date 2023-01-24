@@ -2,13 +2,6 @@
 # yarn lockfile v1
 
 
-"@babel/runtime@^7.20.7":
-  version "7.20.13"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.13.tgz#7055ab8a7cff2b8f6058bf6ae45ff84ad2aded4b"
-  integrity sha512-gt3PKXs0DBoL9xCvOIIZ2NEqAGZqHjAnmVbfQtB620V0uReIQutpel14KcneZuer7UioY8ALKZ7iocavvzTNFA==
-  dependencies:
-    regenerator-runtime "^0.13.11"
-
 "@next/env@13.1.1":
   version "13.1.1"
   resolved "https://registry.yarnpkg.com/@next/env/-/env-13.1.1.tgz#6ff26488dc7674ef2bfdd1ca28fe43eed1113bea"
@@ -131,14 +124,6 @@
   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.2.tgz#1a62f89525723dde24ba1b01b092bf5df8ad4d39"
   integrity sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==
 
-automation-events@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/automation-events/-/automation-events-5.0.0.tgz#805da705809c2d5bea8ab1cfb32165ae05ca3e80"
-  integrity sha512-SkYa2YBwgRUJNsR5v6GxeJwP5IGnYtOMW37coplTOWMUpDYYrk5j8gGOhYa765rchRln/HssFzMAck/2P6zTFw==
-  dependencies:
-    "@babel/runtime" "^7.20.7"
-    tslib "^2.4.1"
-
 caniuse-lite@^1.0.30001406:
   version "1.0.30001447"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001447.tgz#ef1f39ae38d839d7176713735a8e467a0a2523bd"
@@ -225,11 +210,6 @@ react@18.2.0:
   dependencies:
     loose-envify "^1.1.0"
 
-regenerator-runtime@^0.13.11:
-  version "0.13.11"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz#f6dca3e7ceec20590d07ada785636a90cdca17f9"
-  integrity sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==
-
 scheduler@^0.23.0:
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.23.0.tgz#ba8041afc3d30eb206a487b6b384002e4e61fdfe"
@@ -242,15 +222,6 @@ source-map-js@^1.0.2:
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.0.2.tgz#adbc361d9c62df380125e7f161f71c826f1e490c"
   integrity sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==
 
-standardized-audio-context@^25.3.29:
-  version "25.3.37"
-  resolved "https://registry.yarnpkg.com/standardized-audio-context/-/standardized-audio-context-25.3.37.tgz#2b0f00aa5baf369680bc388522504595447c25d9"
-  integrity sha512-lr0+RH/IJXYMts95oYKIJ+orTmstOZN3GXWVGmlkbMj8OLahREkRh7DhNGLYgBGDkBkhhc4ev5pYGSFN3gltHw==
-  dependencies:
-    "@babel/runtime" "^7.20.7"
-    automation-events "^5.0.0"
-    tslib "^2.4.1"
-
 styled-jsx@5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/styled-jsx/-/styled-jsx-5.1.1.tgz#839a1c3aaacc4e735fed0781b8619ea5d0009d1f"
@@ -258,15 +229,7 @@ styled-jsx@5.1.1:
   dependencies:
     client-only "0.0.1"
 
-tone@^14.8.49:
-  version "14.8.49"
-  resolved "https://registry.yarnpkg.com/tone/-/tone-14.8.49.tgz#f3dd9052ee94e4b7b80b38f4c47a23a9a55e9241"
-  integrity sha512-L5YLleEFvkuBYQ83eEL0Fg5DSQS7B28v32sYejnnl8b9yXSytM1X/jNJM1DrB525JGwFb5Pmq5OYZPD9oYQbCQ==
-  dependencies:
-    standardized-audio-context "^25.3.29"
-    tslib "^2.3.1"
-
-tslib@^2.3.1, tslib@^2.4.0, tslib@^2.4.1:
+tslib@^2.4.0:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
   integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==

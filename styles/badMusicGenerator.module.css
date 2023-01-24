@@ -8,6 +8,16 @@
     align-items: center;
 }
 
+.title {
+    text-align: center;
+}
+
+.sillyScope {
+    width: 80%;
+    max-height: 150px;
+    min-height: 50px;
+}
+
 .main > * > * {
     display: block;
     margin-bottom: 24px;

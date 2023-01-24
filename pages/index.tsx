@@ -1,7 +1,9 @@
 import Head from 'next/head'
 import * as tone from "tone"
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import styles from '../styles/badMusicGenerator.module.css'
+
+// useState declarations - for the interface
 
 let getDisplayNotes: string
 let setDisplayNotes: Dispatch<SetStateAction<string>>
@@ -43,6 +45,17 @@ let setJazzHarmonies: Dispatch<SetStateAction<boolean>>
 let getJazzChords: boolean
 let setJazzChords: Dispatch<SetStateAction<boolean>>
 
+// These are outside so our play function can access them
+let audioContext: AudioContext
+let merger: ChannelMergerNode
+
+// Used by the sillyscope for visuals
+let analyser: AnalyserNode
+let bufferLength: number
+let dataArray: Uint8Array
+let canvas: HTMLCanvasElement
+let canvasCtx: CanvasRenderingContext2D
+
 export default function Home() {
     [getDisplayNotes, setDisplayNotes] = useState("") as [string, Dispatch<SetStateAction<string>>]
     [getVoice, setVoice] = useState("sine") as [OscillatorType, Dispatch<SetStateAction<OscillatorType>>]
@@ -58,6 +71,41 @@ export default function Home() {
     [getJazzHarmonies, setJazzHarmonies] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getJazzChords, setJazzChords] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
 
+    useEffect(() => {
+        // Audio context - the root node of Web Audio API
+        audioContext = new AudioContext()
+        // const canvas = document.getElementById("sillyScope")
+
+        // Analyser - used to get a visualisation of the waveform
+        analyser = audioContext.createAnalyser()
+        bufferLength = analyser.frequencyBinCount
+        dataArray = new Uint8Array(bufferLength);
+        analyser.getByteTimeDomainData(dataArray);
+        analyser.connect(audioContext.destination)
+
+        // Volume controls
+        const volume = audioContext.createGain()
+        volume.connect(analyser)
+        volume.gain.value = 0.16
+
+
+        // required to get stereo again after merging
+        const stereoPan = audioContext.createStereoPanner()
+        stereoPan.pan.value = 0.5
+        stereoPan.connect(volume)
+
+        // this is attempting to fix the phone-audio bug
+        merger = audioContext.createChannelMerger(6)
+        merger.connect(stereoPan)
+
+        // Set up visuals
+        canvas = document.getElementById("sillyScope") as HTMLCanvasElement
+        canvasCtx = canvas.getContext("2d")!
+
+        drawSillyScope()
+
+    }, []);
+
     return (
         <>
             <Head>
@@ -68,6 +116,7 @@ export default function Home() {
             </Head>
             <main className={styles.main}>
                 <h1 className={styles.title}>Bad Music Generator</h1>
+                <canvas id="sillyScope" className={styles.sillyScope}></canvas>
                 <div>
                     <button className={styles.bigButton} onClick={playMusic}>
                         Play
@@ -179,23 +228,16 @@ type NoteArrayWithSilence = Array<MusicalNoteWithLength | { note: "silence", not
 
 
 
-// These are outside so our play function can access them
-let audioContext: AudioContext
-let merger: ChannelMergerNode
+
+
+
+
+
 function playMusic() {
 
-    audioContext = new AudioContext()
-    const volume = audioContext.createGain()
-    volume.connect(audioContext.destination)
-    volume.gain.value = 0.16
-    // required to get stereo again after merging
-    const stereoPan = audioContext.createStereoPanner()
-    stereoPan.pan.value = 0.5
-    stereoPan.connect(volume)
 
-    // this is attempting to fix the phone-audio bug
-    merger = audioContext.createChannelMerger(6)
-    merger.connect(stereoPan)
+
+
 
     /**
      * MAKE THE MUSIC!
@@ -219,8 +261,48 @@ function playMusic() {
 
 
 
+function drawSillyScope() {
+    // This code is from the mozilla api docs
+    requestAnimationFrame(drawSillyScope);
+
+    analyser.getByteTimeDomainData(dataArray);
+
+    canvasCtx.fillStyle = "rgb(249, 249, 249)";
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    canvasCtx.lineWidth = 2;
+    canvasCtx.strokeStyle = "rgb(0, 0, 0)";
+
+    canvasCtx.beginPath();
+
+    const sliceWidth = (canvas.width * 1.1) / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * canvas.height) / 2;
+
+        if (i === 0) {
+            canvasCtx.moveTo(x, y);
+        } else {
+            canvasCtx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+    }
+
+    canvasCtx.lineTo(canvas.width + 1, canvas.height / 2);
+    canvasCtx.stroke();
+}
 
 
+
+
+
+
+/**
+ * Functions to help generate the music
+ */
 
 /**
  * Builds a major scale out, based on the starting note

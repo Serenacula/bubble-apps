@@ -1,6 +1,6 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { DetailedHTMLProps, Dispatch, HTMLAttributes, SetStateAction, useState } from 'react'
+import * as tone from "tone"
+import { Dispatch, SetStateAction, useState } from 'react'
 import styles from '../styles/badMusicGenerator.module.css'
 
 let getDisplayNotes: string
@@ -11,6 +11,10 @@ let setVoice: Dispatch<SetStateAction<OscillatorType>>
 
 let getScale: MusicalNote | "random"
 let setScale: Dispatch<SetStateAction<MusicalNote | "random">>
+
+type ScaleType = "major" | "minor" | "random"
+let getScaleType: ScaleType
+let setScaleType: Dispatch<SetStateAction<ScaleType>>
 
 let getChordFrequencyMultiplier: number
 let setChordFrequencyMultiplier: Dispatch<SetStateAction<number>>
@@ -43,9 +47,10 @@ export default function Home() {
     [getDisplayNotes, setDisplayNotes] = useState("") as [string, Dispatch<SetStateAction<string>>]
     [getVoice, setVoice] = useState("sine") as [OscillatorType, Dispatch<SetStateAction<OscillatorType>>]
     [getScale, setScale] = useState("random") as [MusicalNote | "random", Dispatch<SetStateAction<MusicalNote | "random">>]
+    [getScaleType, setScaleType] = useState("major") as [ScaleType, Dispatch<SetStateAction<ScaleType>>]
     [getBeatsPerMinute, setBeatsPerMinute] = useState(240) as [number, Dispatch<SetStateAction<number>>]
-    [getBeatsInABar, setBeatsInABar] = useState(3) as [number, Dispatch<SetStateAction<number>>]
-    [getPercentageOfNotesDropped, setPercentageOfNotesDropped] = useState(20) as [number, Dispatch<SetStateAction<number>>]
+    [getBeatsInABar, setBeatsInABar] = useState(4) as [number, Dispatch<SetStateAction<number>>]
+    [getPercentageOfNotesDropped, setPercentageOfNotesDropped] = useState(10) as [number, Dispatch<SetStateAction<number>>]
     [getChordFrequencyMultiplier, setChordFrequencyMultiplier] = useState(0.50) as [number, Dispatch<SetStateAction<number>>]
     [getBanRepeatedNotes, setBanRepeatedNotes] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
     [getRandomiseRootNote, setRandomiseRootNote] = useState(false) as [boolean, Dispatch<SetStateAction<boolean>>]
@@ -63,6 +68,7 @@ export default function Home() {
             </Head>
             <main className={styles.main}>
                 <h1 className={styles.title}>Bad Music Generator</h1>
+                <p>This does not work well on phones. I don't know why.</p>
                 <div>
                     <button className={styles.bigButton} onClick={playMusic}>
                         Play
@@ -83,21 +89,29 @@ export default function Home() {
                             <option value="sawtooth" >Sawtooth</option>
                             <option value="square">Square</option>
                         </select>
-                        Voice: changes the sound produced
+                        Voice: changes the sound produced. Rougher sounds like sawtooth and square work best on mobile.
                     </label>
                     <label>
-                        <select name="scale" className={styles.input} defaultValue="random" onChange={(choice) => setScale(choice.target.value as MusicalNote | "random")}>
+                        <select name="scale" className={styles.input} onChange={(choice) => setScale(choice.target.value as MusicalNote | "random")}>
                             <option value="random">Random</option>
-                            {notes.map(note => <option value={note}>{note}</option>)}
+                            {notes.map(note => <option value={note} key={note}>{note}</option>)}
                         </select>
                         Scale Key
+                    </label>
+                    <label>
+                        <select name="scaleType" className={styles.input} defaultValue="major" onChange={(choice) => setScaleType(choice.target.value as ScaleType)}>
+                            <option value="random">Random</option>
+                            <option value="major">Major</option>
+                            <option value="minor" >Minor</option>
+                        </select>
+                        Scale Type
                     </label>
                     <label>
                         <input type="number" className={styles.input} name="quantity" min="1" max="9999" step="1" value={getBeatsPerMinute} onChange={(change) => { setBeatsPerMinute(change.target.value as unknown as number) }} />
                         Beats Per Minute
                     </label>
                     <label>
-                        <input type="number" className={styles.input} name="quantity" min="1" max="7" step="1" value={getBeatsInABar} onChange={(change) => { setBeatsInABar(change.target.value as unknown as number) }} />
+                        <input type="number" className={styles.input} name="quantity" min="1" max="48" step="1" value={getBeatsInABar} onChange={(change) => { setBeatsInABar(change.target.value as unknown as number) }} />
                         Beats in a Bar
                     </label>
 
@@ -137,7 +151,8 @@ export default function Home() {
     )
 }
 
-let audioContext: AudioContext
+
+
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
 const musicalNotes = {
     "C": 261.63,
@@ -165,11 +180,23 @@ type NoteArrayWithSilence = Array<MusicalNoteWithLength | { note: "silence", not
 
 
 
-
-
+// These are outside so our play function can access them
+let audioContext: AudioContext
+let merger: ChannelMergerNode
 function playMusic() {
 
     audioContext = new AudioContext()
+    const volume = audioContext.createGain()
+    volume.connect(audioContext.destination)
+    volume.gain.value = 0.16
+    // required to get stereo again after merging
+    const stereoPan = audioContext.createStereoPanner()
+    stereoPan.pan.value = 0.5
+    stereoPan.connect(volume)
+
+    // this is attempting to fix the phone-audio bug
+    merger = audioContext.createChannelMerger(6)
+    merger.connect(stereoPan)
 
     /**
      * MAKE THE MUSIC!
@@ -181,10 +208,12 @@ function playMusic() {
     const melody2 = generateMelody(scale, randomHarmonic(scale, rootNote))
     const chords = generateChords(melody, scale)
 
-    playNotes(convertToFrequencies(melody, 1))
-    getSecondMelody && playNotes(convertToFrequencies(melody2, 1))
+    playNotes(convertToFrequencies(melody, 1), undefined, 0)
+    getSecondMelody && playNotes(convertToFrequencies(melody2, 1), undefined, 1)
+    let i = 2
     for (const chordChart of chords) {
-        playNotes(convertToFrequencies(chordChart, getChordFrequencyMultiplier))
+        playNotes(convertToFrequencies(chordChart, getChordFrequencyMultiplier), undefined, i)
+        i++
     }
 }
 
@@ -197,11 +226,22 @@ function playMusic() {
 /**
  * Builds a major scale out, based on the starting note
  */
-function generateScale(rootNote: MusicalNote, scaleType: "major" | "minor" = "major"): NoteArray {
-    const rootIndex = notes.indexOf(rootNote)
+function generateScale(rootNote: MusicalNote): NoteArray {
+    let scalePositions: number[]
     const majorScale = [0, 2, 4, 5, 7, 9, 11]
     const minorScale = [0, 2, 3, 5, 7, 9, 11]
-    const scalePositions = scaleType === "minor" ? minorScale : majorScale
+    if (getScaleType === "random") {
+        if (Math.random() * 10 < 5) {
+            scalePositions = majorScale
+        } else {
+            scalePositions = minorScale
+        }
+    } else if (getScaleType === "major") {
+        scalePositions = majorScale
+    } else {
+        scalePositions = minorScale
+    }
+    const rootIndex = notes.indexOf(rootNote)
     const doubledNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     return scalePositions.map(position => doubledNotes[position + rootIndex] as MusicalNote)
 }
@@ -230,9 +270,9 @@ function randomNote(scale?: NoteArray, bannedNotes?: MusicalNote[]): MusicalNote
 
 function randomHarmonic(scale: NoteArray, rootNote: MusicalNote): MusicalNote {
     const doubledScale = [...scale, ...scale]
-    const harmonics = [rootNote, scale[scale.indexOf(rootNote) + 2], scale[scale.indexOf(rootNote) + 4]] as MusicalNote[]
+    const harmonics = [rootNote, doubledScale[scale.indexOf(rootNote) + 2], doubledScale[scale.indexOf(rootNote) + 4]] as MusicalNote[]
     if (getJazzHarmonies) {
-        harmonics.push(scale[scale.indexOf(rootNote) + 6])
+        harmonics.push(doubledScale[scale.indexOf(rootNote) + 6])
     }
 
     return harmonics[Math.floor(Math.random() * harmonics.length)]
@@ -244,15 +284,16 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
     const scale = inputScale
 
     const firstPhrase = randomPhrase(scale, rootNote)
+    const secondPhrase = randomPhrase(scale, rootNote)
     const melody: NoteArrayWithSilence = [
         ...firstPhrase,
         ...firstPhrase,
         ...randomPhrase(scale, rootNote),
         ...firstPhrase,
-        // {
-        //     note: rootNote,
-        //     noteLength: 4
-        // }
+        // ...secondPhrase,
+        // ...secondPhrase,
+        // ...randomPhrase(scale, rootNote),
+        // ...firstPhrase
     ]
 
     return melody
@@ -270,16 +311,15 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
 
     function randomPhrase(scale: NoteArray, firstNote: MusicalNote = scale[0]): NoteArrayWithSilence {
 
-        const firstThreeNotes = randomSetOfNotes(scale, firstNote)
+        const firstNoteSet = randomSetOfNotes(scale, firstNote)
 
-        const secondThreeNotes = chooseNoteType(scale, randomHarmonic(scale, firstNote))
-        const thirdThreeNotes = chooseNoteType(scale, randomHarmonic(scale, firstNote))
-        firstNote
+        const secondNoteSet = chooseNoteType(scale, randomHarmonic(scale, firstNote))
+        const thirdNoteSet = chooseNoteType(scale, randomHarmonic(scale, firstNote))
 
         const phrase = [
-            ...firstThreeNotes,
-            ...secondThreeNotes,
-            ...thirdThreeNotes,
+            ...firstNoteSet,
+            ...secondNoteSet,
+            ...thirdNoteSet,
             firstNote
         ]
 
@@ -334,7 +374,7 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
             // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 2])
             // result.push(doubledNotes[doubledNotes.lastIndexOf(result[0]) - 3])
         }
-        console.log(result);
+        // console.log(result);
 
 
         return result
@@ -352,7 +392,7 @@ function generateMelody(inputScale: NoteArray, rootNote: MusicalNote = inputScal
         const bannedNotes: NoteArray = [firstNote]
         while (result.length < getBeatsInABar && i < 25) {
             if (bannedNotes.length >= scale.length) {
-                console.warn("cannot have more beats in a bar than notes in the scale")
+                console.warn("cannot ban notes when there are fewer notes in the scale than beats in a bar")
                 result.push(randomNote(scale))
             } else {
                 const newNote = randomNote(scale, bannedNotes)
@@ -439,7 +479,7 @@ function convertToFrequencies(score: NoteArrayWithSilence, frequencyMultiplier: 
     })
 }
 
-function playNotes(noteFrequencies: PlayableFrequencies, timeDelay = 0) {
+function playNotes(noteFrequencies: PlayableFrequencies, timeDelay = 0, mergerNumber: number) {
     // console.log(noteFrequencies);
 
     let timeCounter = tempo(timeDelay)
@@ -447,7 +487,7 @@ function playNotes(noteFrequencies: PlayableFrequencies, timeDelay = 0) {
         if (note.frequency) {
 
             const oscillator = audioContext.createOscillator()
-            oscillator.connect(audioContext.destination);
+            oscillator.connect(merger, undefined, mergerNumber);
 
             oscillator.type = getVoice || "square"
             oscillator.frequency.value = note.frequency

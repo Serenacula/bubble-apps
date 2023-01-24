@@ -86,7 +86,7 @@ export default function Home() {
         // Volume controls
         const volume = audioContext.createGain()
         volume.connect(analyser)
-        volume.gain.value = 0.16
+        volume.gain.value = 0.3
 
 
         // required to get stereo again after merging

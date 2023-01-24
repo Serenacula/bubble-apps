@@ -116,7 +116,7 @@ export default function Home() {
             </Head>
             <main className={styles.main}>
                 <h1 className={styles.title}>Bad Music Generator</h1>
-                <canvas id="sillyScope" className={styles.sillyScope}></canvas>
+                <canvas id="sillyScope" width="1028" className={styles.sillyScope}></canvas>
                 <div>
                     <button className={styles.bigButton} onClick={playMusic}>
                         Play
@@ -262,7 +262,7 @@ function playMusic() {
 
 
 function drawSillyScope() {
-    // This code is from the mozilla api docs
+    // This code is mostly from the mozilla api docs
     requestAnimationFrame(drawSillyScope);
 
     analyser.getByteTimeDomainData(dataArray);
@@ -270,7 +270,7 @@ function drawSillyScope() {
     canvasCtx.fillStyle = "rgb(249, 249, 249)";
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-    canvasCtx.lineWidth = 2;
+    canvasCtx.lineWidth = 4;
     canvasCtx.strokeStyle = "rgb(0, 0, 0)";
 
     canvasCtx.beginPath();
@@ -283,9 +283,9 @@ function drawSillyScope() {
         const y = (v * canvas.height) / 2;
 
         if (i === 0) {
-            canvasCtx.moveTo(x, y);
+            canvasCtx.moveTo(x, y + 0.5);
         } else {
-            canvasCtx.lineTo(x, y);
+            canvasCtx.lineTo(x, y + 0.5);
         }
 
         x += sliceWidth;
